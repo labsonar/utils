@@ -24,8 +24,8 @@ setuptools.setup(
     name=package_name,
     version='0.0.1',
     packages=setuptools.find_packages(),
-    description='A simple Python project setup example.',
-    author='Author Name',
+    description='A simple utility Python library.',
+    author='Fabio Oliveira',
     license='CC BY-NC-SA 4.0',
     install_requires=[
         # List your project dependencies here
