@@ -2,7 +2,7 @@ import math
 
 import lps_utils.quantities as lps_qty
 
-print('############## Testing distances ##############')
+print('\n############## Testing distances ##############')
 
 d1 = lps_qty.Distance.m(5000)
 d2 = lps_qty.Distance.km(5)
@@ -40,7 +40,7 @@ print("d2 >= d2 = ", (d2 >= d2))
 print("d2 <= d2 = ", (d2 <= d2))
 
 
-print('############## Testing time - frequency ##############')
+print('\n############## Testing time - frequency ##############')
 
 t1 = lps_qty.Time.ms(500)
 t2 = lps_qty.Time.s(1)
@@ -63,7 +63,7 @@ print("f1 / t1 = ", f1 / t1)
 print('t1 * f1 = ', t1 * f1)
 
 
-print('############## Testing Speed ##############')
+print('\n############## Testing Speed ##############')
 
 t = lps_qty.Time.s(10)
 d = lps_qty.Distance.m(50)
@@ -87,7 +87,7 @@ print('s / f = ', s / f)
 print('d * f = ', d * f)
 
 
-print('############## Testing Acceleration ##############')
+print('\n############## Testing Acceleration ##############')
 
 d = lps_qty.Distance.m(50)
 
@@ -128,3 +128,28 @@ print('av2 / av1 = ', av2 / av1)
 print('av1 * av2 = ', av1 * av2)
 
 print('av1 * dt = ', av1 * t)
+
+
+print("\n======= Testing timestamp =======")
+
+ts = lps_qty.Timestamp()
+dt1 = lps_qty.Time.m(15)
+dt2 = lps_qty.Time.s(15)
+
+print('ts = ', ts)
+print('dt1 = ', dt1)
+print('dt2 = ', dt2)
+
+print('ts + dt1 = ', ts + dt1)
+print('dt1 + ts = ', dt1 + ts)
+
+ts2 = ts + dt2
+ts2.sleep()
+
+print('ts2 = ts + dt2', ts2)
+print('slepping')
+
+ts3 = lps_qty.Timestamp()
+
+print('ts2 = ', ts2)
+print('ts3 = ', ts3)

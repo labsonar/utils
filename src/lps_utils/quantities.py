@@ -4,6 +4,11 @@ Module for representing quantities with units, prefixes, and powers.
 This module provides classes for defining physical quantities with units and prefixes,
 along with methods to convert between units and prefixes.
 """
+import time
+import datetime
+import threading
+import math
+
 import lps_utils.unity as lps_unity
 
 class Quantity():
@@ -315,6 +320,11 @@ class Time(Quantity):
 
         return super().__mul__(other)
 
+    def __add__(self, other):
+        if isinstance(other, Timestamp):
+            return Timestamp.ns(self.get_ns() + other.get_ns())
+
+        return super().__add__(other)
 
 class Frequency(Quantity):
     """ Class to represent frequency with predefined units. """
@@ -541,3 +551,81 @@ class AngularVelocity(Quantity):
             return Angle.rad(self.get_rad_s() * other.get_s())
 
         return super().__mul__(other)
+
+
+class Timestamp:
+    def __init__(self, t=None):
+        if t is None:
+            t = int(time.time_ns())  # Current time in nanoseconds
+        self._t = t
+
+    @staticmethod
+    def s(seconds: float) -> 'Timestamp':
+        return Timestamp(int(seconds * 1e9))
+
+    @staticmethod
+    def ns(nanoseconds: int) -> 'Timestamp':
+        return Timestamp(nanoseconds)
+
+    @staticmethod
+    def iso8601(string: str) -> 'Timestamp':
+        dt = datetime.datetime.fromisoformat(string)
+        return Timestamp(int(dt.timestamp() * 1e9))
+
+    def get_time_t(self) -> int:
+        return int(self._t / 1e9)
+
+    def get_s(self) -> float:
+        return self._t / 1e9
+
+    def get_ns(self) -> int:
+        return self._t
+
+    def to_string(self, format: str = "%d/%m/%Y %H:%M:%S") -> str:
+        dt = datetime.datetime.fromtimestamp(self.get_s())
+        return dt.strftime(format)
+
+    def to_iso8601(self) -> str:
+        return self.to_string("%Y-%m-%d %H:%M:%S")
+
+    def sleep(self):
+        target_time = self._t / 1e9
+        current_time = time.time()
+        sleep_time = max(0, target_time - current_time)
+        time.sleep(sleep_time)
+
+    def __eq__(self, other: 'Timestamp') -> bool:
+        return self._t == other._t
+
+    def __ne__(self, other: 'Timestamp') -> bool:
+        return self._t != other._t
+
+    def __gt__(self, other: 'Timestamp') -> bool:
+        return self._t > other._t
+
+    def __lt__(self, other: 'Timestamp') -> bool:
+        return self._t < other._t
+
+    def __ge__(self, other: 'Timestamp') -> bool:
+        return self._t >= other._t
+
+    def __le__(self, other: 'Timestamp') -> bool:
+        return self._t <= other._t
+
+    def __str__(self) -> str:
+        return self.to_string()
+
+    def __add__(self, other):
+        if isinstance(other, Time):
+            return Timestamp.ns(self.get_ns() + other.get_ns())
+
+        raise NotImplementedError(f'Timestamp + {type(other)}')
+
+    def __sub__(self, other):
+        if isinstance(other, Timestamp):
+            return Time.ns(self.get_ns() - other.get_ns())
+        
+        if isinstance(other, Time):
+            return Timestamp.ns(self.get_ns() - other.get_ns())
+
+        raise NotImplementedError(f'Timestamp - {type(other)}')
