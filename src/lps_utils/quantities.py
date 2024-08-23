@@ -554,41 +554,56 @@ class AngularVelocity(Quantity):
 
 
 class Timestamp:
+    """ Class to represent a specific point in time with nanosecond precision. """
+
     def __init__(self, t=None):
+        """
+        Args:
+            t (int, optional): Time in nanoseconds. Defaults to the current time in nanoseconds.
+        """
         if t is None:
             t = int(time.time_ns())  # Current time in nanoseconds
         self._t = t
 
     @staticmethod
     def s(seconds: float) -> 'Timestamp':
+        """ Creates a Timestamp instance from the given time in seconds. """
         return Timestamp(int(seconds * 1e9))
 
     @staticmethod
     def ns(nanoseconds: int) -> 'Timestamp':
+        """ Creates a Timestamp instance from the given time in nanoseconds. """
         return Timestamp(nanoseconds)
 
     @staticmethod
     def iso8601(string: str) -> 'Timestamp':
+        """ Creates a Timestamp instance from an ISO 8601 formatted string. """
         dt = datetime.datetime.fromisoformat(string)
         return Timestamp(int(dt.timestamp() * 1e9))
 
     def get_time_t(self) -> int:
+        """ Returns the time as a Unix timestamp in seconds. """
         return int(self._t / 1e9)
 
     def get_s(self) -> float:
+        """ Returns the time in seconds. """
         return self._t / 1e9
 
     def get_ns(self) -> int:
+        """ Returns the time in nanoseconds. """
         return self._t
 
     def to_string(self, format: str = "%d/%m/%Y %H:%M:%S") -> str:
+        """ Converts the Timestamp to a formatted string. """
         dt = datetime.datetime.fromtimestamp(self.get_s())
         return dt.strftime(format)
 
     def to_iso8601(self) -> str:
+        """ Converts the Timestamp to an ISO 8601 formatted string. """
         return self.to_string("%Y-%m-%d %H:%M:%S")
 
     def sleep(self):
+        """ Pauses execution until the time represented by this Timestamp is reached. """
         target_time = self._t / 1e9
         current_time = time.time()
         sleep_time = max(0, target_time - current_time)
