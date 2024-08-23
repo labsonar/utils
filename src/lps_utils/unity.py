@@ -5,6 +5,7 @@ string representation of the unit in symbol-formatted output.
 """
 import enum
 import abc
+import math
 
 
 class Prefix(enum.Enum):
@@ -100,7 +101,6 @@ class Prefix(enum.Enum):
         return self.name.lower()
 
 
-
 class Unity():
     """ Class to represent a basic unity. """
 
@@ -190,7 +190,6 @@ class Frequency(Unity, enum.Enum):
         return convert_list[self.value]
 
 
-
 class Speed(Unity, enum.Enum):
     """ Enum to represent speed units. """
     M_S = 0
@@ -215,3 +214,82 @@ class Speed(Unity, enum.Enum):
     def __str__(self) -> str:
         """ Returns the unit as str """
         return self.name.lower().replace('_', '/')
+
+
+class Acceleration(Unity, enum.Enum):
+    """ Enum to represent acceleration units. """
+    M_S2 = 0
+    METER_PER_SECOND_SQUARE = 0
+    KM_H2 = 1
+    KILOMETER_PER_HOUR_SQUARE = 1
+    KT_H = 2
+    KNOT_PER_HOUR = 2
+
+    def convert_to_base(self) -> float:
+        """
+        Converts the acceleration unit to meters per second squared.
+
+        Returns:
+            float: The conversion value to the base unit (meters per second squared).
+        """
+        convert_list = [1,
+                        1000.0/(3600*3600),
+                        1852.0/(3600*3600)]
+        return convert_list[self.value]
+
+    def __str__(self) -> str:
+        """ Returns the unit as str """
+        convert_list = ["m/s^2",
+                        "km/h^2",
+                        "kt/h"]
+        return convert_list[self.value]
+
+
+class Angle(Unity, enum.Enum):
+    """ Enum to represent angle units. """
+    RAD = 0
+    RADIAN = 0
+    DEG = 1
+    DEGREE = 1
+
+    def convert_to_base(self) -> float:
+        """
+        Converts the angle unit to radians.
+
+        Returns:
+            float: The conversion value to the base unit (radians).
+        """
+        convert_list = [1,
+                        math.pi/180]
+        return convert_list[self.value]
+
+    def __str__(self) -> str:
+        """ Returns the unit as str """
+        convert_list = ["rad",
+                        "°"]
+        return convert_list[self.value]
+
+
+class AngularVelocity(Unity, enum.Enum):
+    """ Enum to represent angular velocity units. """
+    RAD_S = 0
+    RADIAN_PER_SECOND = 0
+    DEG_S = 1
+    DEGREE_PER_SECOND = 1
+
+    def convert_to_base(self) -> float:
+        """
+        Converts the angular velocity unit to radians per second.
+
+        Returns:
+            float: The conversion value to the base unit (radians per second).
+        """
+        convert_list = [1,
+                        math.pi/180]
+        return convert_list[self.value]
+
+    def __str__(self) -> str:
+        """ Returns the unit as str """
+        convert_list = ["rad/s",
+                        "°/s"]
+        return convert_list[self.value]

@@ -19,3 +19,16 @@ for unity in lps_unity.Speed:
 print('lps_unity.Frequency')
 for unity in lps_unity.Frequency:
     print('\t', unity.name, ': ', str(unity), ' ->  ', unity.convert_to_base())
+
+print('lps_unity.Acceleration')
+for unity in lps_unity.Acceleration:
+    print('\t', unity.name, ': ', str(unity), ' ->  ', unity.convert_to_base())
+
+
+print('lps_unity.Angle')
+for unity in lps_unity.Angle:
+    print('\t', unity.name, ': ', str(unity), ' ->  ', unity.convert_to_base())
+
+print('lps_unity.AngularVelocity')
+for unity in lps_unity.AngularVelocity:
+    print('\t', unity.name, ': ', str(unity), ' ->  ', unity.convert_to_base())

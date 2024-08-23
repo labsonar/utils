@@ -86,14 +86,14 @@ class Quantity():
 
     def __add__(self, other: 'Quantity') -> 'Quantity':
         self._check_compatibility(other)
-        return Quantity(self.magnitude + other.get(self.unity, self.prefix),
+        return self.__class__(self.magnitude + other.get(self.unity, self.prefix),
                         self.unity,
                         self.prefix,
                         self.power)
 
     def __sub__(self, other: 'Quantity') -> 'Quantity':
         self._check_compatibility(other)
-        return Quantity(self.magnitude - other.get(self.unity, self.prefix),
+        return self.__class__(self.magnitude - other.get(self.unity, self.prefix),
                         self.unity,
                         self.prefix,
                         self.power)
@@ -102,13 +102,13 @@ class Quantity():
 
         if isinstance(other, type(self)):
             self._check_compatibility(other)
-            return Quantity(self.magnitude * other.get(self.unity, self.prefix),
+            return self.__class__(self.magnitude * other.get(self.unity, self.prefix),
                         self.unity,
                         self.prefix,
                         self.power + other.power)
 
         if isinstance(other, (int, float)):
-            return Quantity(self.magnitude * other,
+            return self.__class__(self.magnitude * other,
                         self.unity,
                         self.prefix,
                         self.power)
@@ -126,13 +126,13 @@ class Quantity():
             if self.power == other.power:
                 return self.magnitude / other.get(self.unity, self.prefix)
 
-            return Quantity(self.magnitude / other.get(self.unity, self.prefix),
+            return self.__class__(self.magnitude / other.get(self.unity, self.prefix),
                         self.unity,
                         self.prefix,
                         self.power - other.power)
 
         if isinstance(other, (int, float)):
-            return Quantity(self.magnitude / other,
+            return self.__class__(self.magnitude / other,
                         self.unity,
                         self.prefix,
                         self.power)
@@ -140,18 +140,19 @@ class Quantity():
         raise NotImplementedError(f'__truediv__ for {type(self)} and {type(other)}')
 
     def __rtruediv__(self, scale: float) -> 'Quantity':
-        return Quantity(scale / self.magnitude,
+        return self.__class__(scale / self.magnitude,
                         self.unity,
                         self.prefix,
                         self.power * -1)
 
     def __pow__(self, exponent: float) -> 'Quantity':
-        return Quantity(
+        return self.__class__(
             self.magnitude ** exponent,
             self.unity,
             self.prefix,
             self.power * exponent
         )
+
 
 class Distance(Quantity):
     """ Class to represent Distance with predefined units. """
@@ -205,7 +206,6 @@ class Distance(Quantity):
         return Distance(kyd, lps_unity.Distance.YD, lps_unity.Prefix.k)
 
     def __mul__(self, other) -> 'Quantity':
-
         if isinstance(other, Frequency):
             return self / (1/other)
 
@@ -213,12 +213,18 @@ class Distance(Quantity):
 
     def __truediv__(self, other) -> 'Quantity':
         if isinstance(other, Time):
-            return Speed.m_s(self.get_m() / other.get_s())
+            if self.power == other.power:
+                return Speed.m_s(self.get_m() / other.get_s())
+
+            if 2 * self.power == other.power:
+                return Acceleration.m_s2(self.get_m() / other.get_s())
 
         if isinstance(other, Speed):
-            return Time.s(self.get_m() / other.get_m_s())
+            if self.power == other.power:
+                return Time.s(self.get_m() / other.get_m_s())
 
         return super().__truediv__(other)
+
 
 class Time(Quantity):
     """ Class to represent time with predefined units. """
@@ -298,12 +304,17 @@ class Time(Quantity):
     def __mul__(self, other) -> 'Quantity':
 
         if isinstance(other, Speed):
-            return Distance.m(self.get_s() * other.get_m_s())
+            if self.power == other.power:
+                return Distance.m(self.get_s() * other.get_m_s())
 
         if isinstance(other, Frequency):
             return self / (1/other)
 
+        if isinstance(other, Acceleration):
+            return other * self
+
         return super().__mul__(other)
+
 
 class Frequency(Quantity):
     """ Class to represent frequency with predefined units. """
@@ -392,6 +403,7 @@ class Speed(Quantity):
         return Speed(kt, lps_unity.Speed.KT)
 
     def __mul__(self, other) -> 'Quantity':
+
         if isinstance(other, Time):
             return other * self
 
@@ -404,4 +416,128 @@ class Speed(Quantity):
         if isinstance(other, Frequency):
             return self*(1/other)
 
+        if isinstance(other, Time):
+            if self.power == other.power:
+                return Acceleration.m_s2(self.get_m_s() / other.get_s())
+
         return super().__truediv__(other)
+
+
+class Acceleration(Quantity):
+    """ Class to represent Acceleration with predefined units. """
+
+    def __init__(self,
+                 magnitude: float,
+                 unity: lps_unity.Acceleration,
+                 prefix: lps_unity.Prefix = lps_unity.Prefix.BASE,
+                 power: int = 1):
+        super().__init__(magnitude, unity, prefix, power)
+
+    def get_m_s2(self) -> float:
+        """ Returns the magnitude in meters per second squared. """
+        return self.get(lps_unity.Acceleration.M_S2)
+
+    def get_km_h2(self) -> float:
+        """ Returns the magnitude in kilometers per hour squared. """
+        return self.get(lps_unity.Acceleration.KM_H2)
+
+    def get_kt_h(self) -> float:
+        """ Returns the magnitude in knots per hour. """
+        return self.get(lps_unity.Acceleration.KT_H)
+
+    @staticmethod
+    def m_s2(m_s2: float) -> 'Acceleration':
+        """ Creates an Acceleration instance with the magnitude in meters per second squared. """
+        return Acceleration(m_s2, lps_unity.Acceleration.M_S2)
+
+    @staticmethod
+    def km_h2(km_h2: float) -> 'Acceleration':
+        """ Creates an Acceleration instance with the magnitude in kilometers per hour squared. """
+        return Acceleration(km_h2, lps_unity.Acceleration.KM_H2)
+
+    @staticmethod
+    def kt_h(kt_h: float) -> 'Acceleration':
+        """ Creates an Acceleration instance with the magnitude in knots per hour. """
+        return Acceleration(kt_h, lps_unity.Acceleration.KT_H)
+
+    def __mul__(self, other) -> 'Quantity':
+        if isinstance(other, Time):
+            if self.power == other.power:
+                return Speed.m_s(self.get_m_s2() * other.get_s())
+
+            if 2 * self.power == other.power:
+                return Distance.m(self.get_m_s2() * other.get_s())
+
+        return super().__mul__(other)
+
+    # def __truediv__(self, other) -> 'Quantity':
+    #     return super().__truediv__(other)
+
+
+class Angle(Quantity):
+    """ Class to represent Angle with predefined units. """
+
+    def __init__(self,
+                 magnitude: float,
+                 unity: lps_unity.Angle,
+                 prefix: lps_unity.Prefix = lps_unity.Prefix.BASE,
+                 power: int = 1):
+        super().__init__(magnitude, unity, prefix, power)
+
+    def get_rad(self) -> float:
+        """ Returns the magnitude in radians. """
+        return self.get(lps_unity.Angle.RAD)
+
+    def get_deg(self) -> float:
+        """ Returns the magnitude in degrees. """
+        return self.get(lps_unity.Angle.DEG)
+
+    @staticmethod
+    def rad(rad: float) -> 'Angle':
+        """ Creates an Angle instance with the magnitude in radians. """
+        return Angle(rad, lps_unity.Angle.RAD)
+
+    @staticmethod
+    def deg(deg: float) -> 'Angle':
+        """ Creates an Angle instance with the magnitude in degrees. """
+        return Angle(deg, lps_unity.Angle.DEG)
+
+    def __truediv__(self, other) -> 'Quantity':
+        if isinstance(other, Time):
+            return AngularVelocity.rad_s(self.get_rad() / other.get_s())
+        return super().__truediv__(other)
+
+
+class AngularVelocity(Quantity):
+    """ Class to represent Angular Velocity with predefined units. """
+
+    def __init__(self,
+                 magnitude: float,
+                 unity: lps_unity.AngularVelocity,
+                 prefix: lps_unity.Prefix = lps_unity.Prefix.BASE,
+                 power: int = 1):
+        super().__init__(magnitude, unity, prefix, power)
+
+    def get_rad_s(self) -> float:
+        """ Returns the magnitude in radians per second. """
+        return self.get(lps_unity.AngularVelocity.RAD_S)
+
+    def get_deg_s(self) -> float:
+        """ Returns the magnitude in degrees per second. """
+        return self.get(lps_unity.AngularVelocity.DEG_S)
+
+    @staticmethod
+    def rad_s(rad_s: float) -> 'AngularVelocity':
+        """ Creates an AngularVelocity instance with the magnitude in radians per second. """
+        return AngularVelocity(rad_s, lps_unity.AngularVelocity.RAD_S)
+
+    @staticmethod
+    def deg_s(deg_s: float) -> 'AngularVelocity':
+        """ Creates an AngularVelocity instance with the magnitude in degrees per second. """
+        return AngularVelocity(deg_s, lps_unity.AngularVelocity.DEG_S)
+
+    def __mul__(self, other) -> 'Quantity':
+        if isinstance(other, Time):
+            return Angle.rad(self.get_rad_s() * other.get_s())
+
+        return super().__mul__(other)

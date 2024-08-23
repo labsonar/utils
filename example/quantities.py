@@ -1,3 +1,5 @@
+import math
+
 import lps_utils.quantities as lps_qty
 
 print('############## Testing distances ##############')
@@ -83,3 +85,46 @@ print('s / d = ', s / d)
 
 print('s / f = ', s / f)
 print('d * f = ', d * f)
+
+
+print('############## Testing Acceleration ##############')
+
+d = lps_qty.Distance.m(50)
+
+t = lps_qty.Time.s(5)
+s = lps_qty.Speed.m_s(5)
+a = lps_qty.Acceleration.m_s2(1)
+
+
+print('dt = ', t)
+print('d = ', d)
+print('s = ', s)
+print('a = ', a)
+
+
+print('s / dt = ', s / t)
+print('d / dt² = ', d /(t*t))
+
+print('a * dt = ', a * t)
+print('dt * a = ', t * a)
+
+print('a * dt² = ', a * (t*t))
+print('dt² * a = ', (t*t) * a)
+
+
+print("======= Testing angular velocity =======")
+
+av1 = lps_qty.AngularVelocity.rad_s(2 * math.pi)
+av2 = lps_qty.AngularVelocity.deg_s(180)
+t = lps_qty.Time.s(0.5)
+
+print('av1 = ', av1)
+print('av2 = ', av2)
+print('dt = ', t)
+
+print('av1 + av2 = ', av1 + av2)
+print('av1 / av2 = ', av1 / av2)
+print('av2 / av1 = ', av2 / av1)
+print('av1 * av2 = ', av1 * av2)
+
+print('av1 * dt = ', av1 * t)
