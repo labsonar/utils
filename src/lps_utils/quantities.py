@@ -6,7 +6,7 @@ along with methods to convert between units and prefixes.
 """
 import time
 import datetime
-import threading
+import re
 import math
 
 import lps_utils.unity as lps_unity
@@ -191,30 +191,30 @@ class Distance(Quantity):
         """ Returns the magnitude in yards. """
         return self.get(lps_unity.Distance.YD)
 
-    @staticmethod
-    def m(m: float) -> 'Distance':
+    @classmethod
+    def m(cls, m: float) -> 'Distance':
         """ Creates a Distance instance with the magnitude in meters. """
-        return Distance(m, lps_unity.Distance.M)
+        return cls(m, lps_unity.Distance.M)
 
-    @staticmethod
-    def km(km: float) -> 'Distance':
+    @classmethod
+    def km(cls, km: float) -> 'Distance':
         """ Creates a Distance instance with the magnitude in kilometers. """
-        return Distance(km, lps_unity.Distance.M, lps_unity.Prefix.k)
+        return cls(km, lps_unity.Distance.M, lps_unity.Prefix.k)
 
-    @staticmethod
-    def nm(nm: float) -> 'Distance':
+    @classmethod
+    def nm(cls, nm: float) -> 'Distance':
         """ Creates a Distance instance with the magnitude in nautical miles. """
-        return Distance(nm, lps_unity.Distance.NM)
+        return cls(nm, lps_unity.Distance.NM)
 
-    @staticmethod
-    def yd(yd: float) -> 'Distance':
+    @classmethod
+    def yd(cls, yd: float) -> 'Distance':
         """ Creates a Distance instance with the magnitude in yards. """
-        return Distance(yd, lps_unity.Distance.YD)
+        return cls(yd, lps_unity.Distance.YD)
 
-    @staticmethod
-    def kyd(kyd: float) -> 'Distance':
+    @classmethod
+    def kyd(cls, kyd: float) -> 'Distance':
         """ Creates a Distance instance with the magnitude in kilometers of yards. """
-        return Distance(kyd, lps_unity.Distance.YD, lps_unity.Prefix.k)
+        return cls(kyd, lps_unity.Distance.YD, lps_unity.Prefix.k)
 
     def __mul__(self, other) -> 'Quantity':
         if isinstance(other, Frequency):
@@ -271,35 +271,35 @@ class Time(Quantity):
         """ Returns the magnitude in hours. """
         return self.get(lps_unity.Time.H)
 
-    @staticmethod
-    def s(seconds: float) -> 'Time':
+    @classmethod
+    def s(cls, seconds: float) -> 'Time':
         """ Creates a Time instance with the magnitude in seconds. """
-        return Time(seconds, lps_unity.Time.S)
+        return cls(seconds, lps_unity.Time.S)
 
-    @staticmethod
-    def ms(ms: float) -> 'Time':
+    @classmethod
+    def ms(cls, ms: float) -> 'Time':
         """ Creates a Time instance with the magnitude in milliseconds. """
-        return Time(ms, lps_unity.Time.S, lps_unity.Prefix.m)
+        return cls(ms, lps_unity.Time.S, lps_unity.Prefix.m)
 
-    @staticmethod
-    def us(us: float) -> 'Time':
+    @classmethod
+    def us(cls, us: float) -> 'Time':
         """ Creates a Time instance with the magnitude in microseconds. """
-        return Time(us, lps_unity.Time.S, lps_unity.Prefix.u)
+        return cls(us, lps_unity.Time.S, lps_unity.Prefix.u)
 
-    @staticmethod
-    def ns(ns: float) -> 'Time':
+    @classmethod
+    def ns(cls, ns: float) -> 'Time':
         """ Creates a Time instance with the magnitude in nanoseconds. """
-        return Time(ns, lps_unity.Time.S, lps_unity.Prefix.n)
+        return cls(ns, lps_unity.Time.S, lps_unity.Prefix.n)
 
-    @staticmethod
-    def m(minutes: float) -> 'Time':
+    @classmethod
+    def m(cls, minutes: float) -> 'Time':
         """ Creates a Time instance with the magnitude in minutes. """
-        return Time(minutes, lps_unity.Time.M)
+        return cls(minutes, lps_unity.Time.M)
 
-    @staticmethod
-    def h(hours: float) -> 'Time':
+    @classmethod
+    def h(cls, hours: float) -> 'Time':
         """ Creates a Time instance with the magnitude in hours. """
-        return Time(hours, lps_unity.Time.H)
+        return cls(hours, lps_unity.Time.H)
 
     def __rtruediv__(self, scale: float) -> 'Quantity':
         return Frequency(scale / self.get_s(),
@@ -332,6 +332,7 @@ class Time(Quantity):
 
         return super().__add__(other)
 
+
 class Frequency(Quantity):
     """ Class to represent frequency with predefined units. """
 
@@ -354,20 +355,20 @@ class Frequency(Quantity):
         """ Returns the magnitude in rotations per minute. """
         return self.get(lps_unity.Frequency.RPM)
 
-    @staticmethod
-    def hz(hz: float) -> 'Frequency':
+    @classmethod
+    def hz(cls, hz: float) -> 'Frequency':
         """ Creates a Frequency instance with the magnitude in hertz. """
-        return Frequency(hz, lps_unity.Frequency.HZ)
+        return cls(hz, lps_unity.Frequency.HZ)
 
-    @staticmethod
-    def khz(hz: float) -> 'Frequency':
+    @classmethod
+    def khz(cls, hz: float) -> 'Frequency':
         """ Creates a Frequency instance with the magnitude in kilo hertz. """
-        return Frequency(hz, lps_unity.Frequency.HZ, lps_unity.Prefix.k)
+        return cls(hz, lps_unity.Frequency.HZ, lps_unity.Prefix.k)
 
-    @staticmethod
-    def rpm(rpm: float) -> 'Frequency':
+    @classmethod
+    def rpm(cls, rpm: float) -> 'Frequency':
         """ Creates a Frequency instance with the magnitude in rotations per minute. """
-        return Frequency(rpm, lps_unity.Frequency.RPM)
+        return cls(rpm, lps_unity.Frequency.RPM)
 
     def __rtruediv__(self, scale: float) -> 'Quantity':
         return Time(scale / self.get_hz(),
@@ -403,20 +404,20 @@ class Speed(Quantity):
         """ Returns the magnitude in knots. """
         return self.get(lps_unity.Speed.KT)
 
-    @staticmethod
-    def m_s(m_s: float) -> 'Speed':
+    @classmethod
+    def m_s(cls, m_s: float) -> 'Speed':
         """ Creates a Speed instance with the magnitude in meters per second. """
-        return Speed(m_s, lps_unity.Speed.M_S)
+        return cls(m_s, lps_unity.Speed.M_S)
 
-    @staticmethod
-    def km_h(km_h: float) -> 'Speed':
+    @classmethod
+    def km_h(cls, km_h: float) -> 'Speed':
         """ Creates a Speed instance with the magnitude in kilometers per hour. """
-        return Speed(km_h, lps_unity.Speed.KM_H)
+        return cls(km_h, lps_unity.Speed.KM_H)
 
-    @staticmethod
-    def kt(kt: float) -> 'Speed':
+    @classmethod
+    def kt(cls, kt: float) -> 'Speed':
         """ Creates a Speed instance with the magnitude in knots. """
-        return Speed(kt, lps_unity.Speed.KT)
+        return cls(kt, lps_unity.Speed.KT)
 
     def __mul__(self, other) -> 'Quantity':
 
@@ -437,6 +438,7 @@ class Speed(Quantity):
                 return Acceleration.m_s2(self.get_m_s() / other.get_s())
 
         return super().__truediv__(other)
+
 
 
 class Acceleration(Quantity):
@@ -461,20 +463,20 @@ class Acceleration(Quantity):
         """ Returns the magnitude in knots per hour. """
         return self.get(lps_unity.Acceleration.KT_H)
 
-    @staticmethod
-    def m_s2(m_s2: float) -> 'Acceleration':
+    @classmethod
+    def m_s2(cls, m_s2: float) -> 'Acceleration':
         """ Creates an Acceleration instance with the magnitude in meters per second squared. """
-        return Acceleration(m_s2, lps_unity.Acceleration.M_S2)
+        return cls(m_s2, lps_unity.Acceleration.M_S2)
 
-    @staticmethod
-    def km_h2(km_h2: float) -> 'Acceleration':
+    @classmethod
+    def km_h2(cls, km_h2: float) -> 'Acceleration':
         """ Creates an Acceleration instance with the magnitude in kilometers per hour squared. """
-        return Acceleration(km_h2, lps_unity.Acceleration.KM_H2)
+        return cls(km_h2, lps_unity.Acceleration.KM_H2)
 
-    @staticmethod
-    def kt_h(kt_h: float) -> 'Acceleration':
+    @classmethod
+    def kt_h(cls, kt_h: float) -> 'Acceleration':
         """ Creates an Acceleration instance with the magnitude in knots per hour. """
-        return Acceleration(kt_h, lps_unity.Acceleration.KT_H)
+        return cls(kt_h, lps_unity.Acceleration.KT_H)
 
     def __mul__(self, other) -> 'Quantity':
         if isinstance(other, Time):
@@ -488,6 +490,65 @@ class Acceleration(Quantity):
 
     # def __truediv__(self, other) -> 'Quantity':
     #     return super().__truediv__(other)
+
+
+class DMS():
+    """ Class to represent Degree-Minute-Second (DMS) angle representation. """
+
+    def __init__(self, degree: float = 0, minute: float = 0, second: float = 0) -> None:
+        self.degree = degree
+        self.minute = minute
+        self.second = second
+
+    def __str__(self) -> str:
+        return self.to_string()
+
+    def to_string(self, precision: int = 0, show_signal: bool = False) -> str:
+        """ return current angle in DMS representation with the given second precision
+
+        Args:
+            precision (int, optional): Number of decimal places for seconds. Defaults to 0.
+            show_signal (bool, optional): Show negative number. Defaults to False
+                (standard behavior for latitude/longitude).
+
+        Returns:
+            str: DMS string in format -> 43°38'51.000"
+        """
+        aux_degree = self.degree if show_signal else abs(self.degree)
+        format_spec = "02.0f" if precision == 0 else f"{precision + 3}.{precision}f"
+        return f"{aux_degree:02.0f}°{self.minute:02.0f}'{self.second:{format_spec}}\""
+
+    def get_degrees(self) -> float:
+        """ Return angle with degrees with decimal precision. """
+        return self.degree + math.copysign(self.minute/60.0 + self.second/3600.0, self.degree)
+
+    @classmethod
+    def by_degree(cls, degree: float) -> 'DMS':
+        """ Class constructor based on degree with decimal precision. """
+        deg = math.floor(degree) if (degree > 0) else math.ceil(degree)
+        degree = abs(degree) - abs(deg)
+        minute = math.floor(degree*60)
+        degree = degree * 60 - minute
+        sec = degree * 60
+
+        return cls(deg, minute, sec)
+
+    @classmethod
+    def by_string(cls, dms: str) -> 'DMS':
+        """ Class constructor based on DMS string format. """
+        values = [0, 0, 0]
+
+        pieces = re.split("[°'\"]", dms)
+        for i in range(min(len(pieces), len(values))):
+            try:
+                values[i] = float(pieces[i])
+            except ValueError:
+                pass
+
+        if dms.endswith('S') or dms.endswith('W'):
+            values[0] *= -1
+
+        return cls(values[0], values[1], values[2])
 
 
 class Angle(Quantity):
@@ -508,20 +569,71 @@ class Angle(Quantity):
         """ Returns the magnitude in degrees. """
         return self.get(lps_unity.Angle.DEG)
 
-    @staticmethod
-    def rad(rad: float) -> 'Angle':
-        """ Creates an Angle instance with the magnitude in radians. """
-        return Angle(rad, lps_unity.Angle.RAD)
+    def get_dms(self) -> DMS:
+        """ Return string in DMS format. """
+        return DMS.by_degree(self.get_deg())
 
-    @staticmethod
-    def deg(deg: float) -> 'Angle':
+    @classmethod
+    def rad(cls, rad: float) -> 'Angle':
+        """ Creates an Angle instance with the magnitude in radians. """
+        return cls(rad, lps_unity.Angle.RAD)
+
+    @classmethod
+    def deg(cls, deg: float) -> 'Angle':
         """ Creates an Angle instance with the magnitude in degrees. """
-        return Angle(deg, lps_unity.Angle.DEG)
+        return cls(deg, lps_unity.Angle.DEG)
+
+    @classmethod
+    def dms(cls, dms: DMS) -> 'Angle':
+        """ Creates an Angle instance with the magnitude in dms. """
+        return cls(dms.get_degrees(), lps_unity.Angle.DEG)
 
     def __truediv__(self, other) -> 'Quantity':
         if isinstance(other, Time):
             return AngularVelocity.rad_s(self.get_rad() / other.get_s())
         return super().__truediv__(other)
+
+
+class Latitude(Angle):
+    """ Class to represent Latitude with predefined units. """
+
+    def __init__(self,
+                 magnitude: float,
+                 unity: lps_unity.Angle,
+                 prefix: lps_unity.Prefix = lps_unity.Prefix.BASE,
+                 power: int = 1):
+        super().__init__(magnitude, unity, prefix, power)
+
+        if (self.get_rad() < -math.pi/2.0) or (self.get_rad() > math.pi/2.0):
+            raise ValueError(f"invalid_latitude: {self.get_rad()}")
+
+    def get_hemisphere(self) -> str:
+        """ Return N or S given the current angle. """
+        return "N" if self.get_deg()>0 else "S"
+
+    def __str__(self) -> str:
+        return f"{self.get_dms()} {self.get_hemisphere()}"
+
+
+class Longitude(Angle):
+    """ Class to represent Longitude with predefined units. """
+
+    def __init__(self,
+                 magnitude: float,
+                 unity: lps_unity.Angle,
+                 prefix: lps_unity.Prefix = lps_unity.Prefix.BASE,
+                 power: int = 1):
+        super().__init__(magnitude, unity, prefix, power)
+
+        if (self.get_rad() < -math.pi) or (self.get_rad() > math.pi):
+            raise ValueError(f"invalid_latitude: {self.get_rad()}")
+
+    def get_hemisphere(self) -> str:
+        """ Return E or W given the current angle. """
+        return "E" if self.get_deg()>0 else "W"
+
+    def __str__(self) -> str:
+        return f"{self.get_dms()} {self.get_hemisphere()}"
 
 
 class AngularVelocity(Quantity):
@@ -628,10 +740,10 @@ class Timestamp:
         """ Returns the time in nanoseconds. """
         return self._t
 
-    def to_string(self, format: str = "%d/%m/%Y %H:%M:%S") -> str:
+    def to_string(self, format_str: str = "%d/%m/%Y %H:%M:%S") -> str:
         """ Converts the Timestamp to a formatted string. """
         dt = datetime.datetime.fromtimestamp(self.get_s())
-        return dt.strftime(format)
+        return dt.strftime(format_str)
 
     def to_iso8601(self) -> str:
         """ Converts the Timestamp to an ISO 8601 formatted string. """
@@ -674,7 +786,7 @@ class Timestamp:
     def __sub__(self, other):
         if isinstance(other, Timestamp):
             return Time.ns(self.get_ns() - other.get_ns())
-        
+
         if isinstance(other, Time):
             return Timestamp.ns(self.get_ns() - other.get_ns())
 

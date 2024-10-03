@@ -132,24 +132,43 @@ print('av1 * dt = ', av1 * t)
 
 print("\n======= Testing timestamp =======")
 
-ts = lps_qty.Timestamp()
-dt1 = lps_qty.Time.m(15)
-dt2 = lps_qty.Time.s(15)
+# ts = lps_qty.Timestamp()
+# dt1 = lps_qty.Time.m(3)
+# dt2 = lps_qty.Time.s(3)
 
-print('ts = ', ts)
-print('dt1 = ', dt1)
-print('dt2 = ', dt2)
+# print('ts = ', ts)
+# print('dt1 = ', dt1)
+# print('dt2 = ', dt2)
 
-print('ts + dt1 = ', ts + dt1)
-print('dt1 + ts = ', dt1 + ts)
+# print('ts + dt1 = ', ts + dt1)
+# print('dt1 + ts = ', dt1 + ts)
 
-ts2 = ts + dt2
-ts2.sleep()
+# ts2 = ts + dt2
+# ts2.sleep()
 
-print('ts2 = ts + dt2', ts2)
-print('slepping')
+# print('ts2 = ts + dt2', ts2)
+# print('slepping')
 
-ts3 = lps_qty.Timestamp()
+# ts3 = lps_qty.Timestamp()
 
-print('ts2 = ', ts2)
-print('ts3 = ', ts3)
+# print('ts2 = ', ts2)
+# print('ts3 = ', ts3)
+
+
+print("\n======= DMS =======")
+
+dms = lps_qty.DMS.by_degree(20.5)
+dms2 = lps_qty.DMS.by_degree(-43.6474)
+
+print(f"DMS[{dms.degree},{dms.minute},{dms.second}]: {dms.get_degrees()} -> {dms.to_string()}")
+print(f"DMS[{dms2.degree},{dms2.minute},{dms2.second}]: {dms2.get_degrees()} -> {dms2.to_string()}")
+
+dms3 = lps_qty.DMS.by_string(dms.to_string() + "W")
+print(f"DMS[{dms3.degree},{dms3.minute},{dms3.second}]: {dms3.get_degrees()} -> {dms3.to_string()}")
+
+
+lat = lps_qty.Latitude.deg(-22.8)
+print(f"{type(lat)}: {lat}")
+
+lon = lps_qty.Longitude.dms(dms2)
+print(f"{type(lon)}: {lon}")
