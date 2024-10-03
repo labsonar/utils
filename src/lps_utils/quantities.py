@@ -38,6 +38,9 @@ class Quantity():
             return f'{self.magnitude} {self.prefix}{self.unity}'
         return f'{self.magnitude} {self.prefix}({self.unity})^{self.power}'
 
+    def __repr__(self):
+        return self.__str__()
+
     def get(self,
             unity: lps_unity.Unity,
             prefix: lps_unity.Prefix = lps_unity.Prefix.BASE) -> float:
@@ -64,6 +67,9 @@ class Quantity():
         if self.power != other.power:
             raise UnboundLocalError(f'Incompatible power {self.power} with {other.power}')
         return True
+
+    def __hash__(self):
+        return hash((self.magnitude, self.unity.value, self.prefix.value, self.power))
 
     def __eq__(self, other: 'Quantity') -> bool:
         self._check_compatibility(other)
@@ -551,6 +557,35 @@ class AngularVelocity(Quantity):
             return Angle.rad(self.get_rad_s() * other.get_s())
 
         return super().__mul__(other)
+
+
+class Density(Quantity):
+    """ Class to represent Density with predefined units. """
+
+    def __init__(self,
+                 magnitude: float,
+                 unity: lps_unity.Density,
+                 prefix: lps_unity.Prefix = lps_unity.Prefix.BASE,
+                 power: int = 1):
+        super().__init__(magnitude, unity, prefix, power)
+
+    def get_kg_m3(self) -> float:
+        """ Returns the magnitude in kilograms per cubic meter. """
+        return self.get(lps_unity.Density.KG_M3)
+
+    def get_g_cm3(self) -> float:
+        """ Returns the magnitude in grams per cubic centimeter. """
+        return self.get(lps_unity.Density.G_CM3)
+
+    @staticmethod
+    def kg_m3(kg_m3: float) -> 'Density':
+        """ Creates a Density instance with the magnitude in kilograms per cubic meter. """
+        return Density(kg_m3, lps_unity.Density.KG_M3)
+
+    @staticmethod
+    def g_cm3(g_cm3: float) -> 'Density':
+        """ Creates a Density instance with the magnitude in grams per cubic centimeter. """
+        return Density(g_cm3, lps_unity.Density.G_CM3)
 
 
 class Timestamp:

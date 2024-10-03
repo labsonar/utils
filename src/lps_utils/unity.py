@@ -293,3 +293,25 @@ class AngularVelocity(Unity, enum.Enum):
         convert_list = ["rad/s",
                         "°/s"]
         return convert_list[self.value]
+
+
+class Density(Unity, enum.Enum):
+    """ Enum to represent density units. """
+    G_CM3 = 0
+    KG_M3 = 1
+
+    def convert_to_base(self) -> float:
+        """
+        Converts the density unit to grams per cubic centimeter (g/cm³).
+
+        Returns:
+            float: The conversion factor to the base unit (g/cm³).
+        """
+        convert_list = [1,
+                        1e-3]
+        return convert_list[self.value]
+
+    def __str__(self) -> str:
+        """ Returns the unit as string """
+        unit_list = ["g/cm^3", "kg/m^3"]
+        return unit_list[self.value]
