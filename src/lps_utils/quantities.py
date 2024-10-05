@@ -8,7 +8,7 @@ import time
 import datetime
 import re
 import math
-
+import enum
 import lps_utils.unity as lps_unity
 
 class Quantity():
@@ -164,7 +164,6 @@ class Quantity():
             self.power * exponent
         )
 
-
 class Distance(Quantity):
     """ Class to represent Distance with predefined units. """
 
@@ -235,7 +234,6 @@ class Distance(Quantity):
                 return Time.s(self.get_m() / other.get_m_s())
 
         return super().__truediv__(other)
-
 
 class Time(Quantity):
     """ Class to represent time with predefined units. """
@@ -332,7 +330,6 @@ class Time(Quantity):
 
         return super().__add__(other)
 
-
 class Frequency(Quantity):
     """ Class to represent frequency with predefined units. """
 
@@ -380,7 +377,6 @@ class Frequency(Quantity):
         if isinstance(other, Time):
             return self * (1/other)
         return super().__truediv__(other)
-
 
 class Speed(Quantity):
     """ Class to represent speed with predefined units. """
@@ -439,8 +435,6 @@ class Speed(Quantity):
 
         return super().__truediv__(other)
 
-
-
 class Acceleration(Quantity):
     """ Class to represent Acceleration with predefined units. """
 
@@ -490,7 +484,6 @@ class Acceleration(Quantity):
 
     # def __truediv__(self, other) -> 'Quantity':
     #     return super().__truediv__(other)
-
 
 class DMS():
     """ Class to represent Degree-Minute-Second (DMS) angle representation. """
@@ -550,7 +543,6 @@ class DMS():
 
         return cls(values[0], values[1], values[2])
 
-
 class Angle(Quantity):
     """ Class to represent Angle with predefined units. """
 
@@ -593,6 +585,219 @@ class Angle(Quantity):
             return AngularVelocity.rad_s(self.get_rad() / other.get_s())
         return super().__truediv__(other)
 
+class BearingReference(enum.Enum):
+    """ Class to represent reference of a bearing in
+        east counterclockwise (ECCW)
+        west clockwise (NCW). """
+    ECCW = 0
+    EAST_COUNTERCLOCKWISE = 0
+    NCW = 1
+    WEST_CLOCKWISE = 1
+
+class Bearing(Angle):
+    """ Class to represent a Angle between 0-360. """
+
+    def __init__(self,
+                 angle: Angle,
+                 reference: BearingReference):
+        angle = Bearing.coerce(Bearing.set_reference(angle, reference))
+        super().__init__(angle.get_rad(), lps_unity.Angle.RAD)
+
+    @staticmethod
+    def set_reference(angle: Angle, reference: BearingReference) -> Angle:
+        """ Return Angle in ECCW. """
+        return Angle.rad(angle.get_rad() if (reference == BearingReference.ECCW) \
+                         else (math.pi/2.0 - angle.get_rad()))
+
+    @staticmethod
+    def coerce(angle: Angle) -> Angle:
+        """ Coerce an angle in range from 0 to 2pi. """
+        return Angle.rad(math.fmod(angle.get_rad(), 2*math.pi) + \
+                         (0.0 if (angle.get_rad() >= 0) else (2*math.pi) ))
+
+    @classmethod
+    def eccw_deg(cls, degree: float) -> 'Bearing':
+        """ Class constructor in eccw. """
+        return cls(Angle.deg(degree), BearingReference.ECCW)
+
+    @classmethod
+    def eccw_rad(cls, radian: float) -> 'Bearing':
+        """ Class constructor in eccw. """
+        return cls(Angle.rad(radian), BearingReference.ECCW)
+
+    @classmethod
+    def ncw_deg(cls, degree: float) -> 'Bearing':
+        """ Class constructor in ncw. """
+        return cls(Angle.deg(degree), BearingReference.NCW)
+
+    @classmethod
+    def ncw_rad(cls, radian: float) -> 'Bearing':
+        """ Class constructor in ncw. """
+        return cls(Angle.rad(radian), BearingReference.NCW)
+
+    def get_by_reference(self, angle: lps_unity.Angle, reference: BearingReference):
+        """ Return bearing in unity and reference desired. """
+        return Bearing.coerce(Bearing.set_reference(self,reference)).get(angle)
+
+    def get_eccw_deg(self) -> float:
+        """ Return bearing in eccw and degree. """
+        return self.get_by_reference(lps_unity.Angle.DEGREE, BearingReference.ECCW)
+
+    def get_eccw_rad(self) -> float:
+        """ Return bearing in eccw and radian. """
+        return self.get_by_reference(lps_unity.Angle.RADIAN, BearingReference.ECCW)
+
+    def get_ncw_deg(self) -> float:
+        """ Return bearing in ncw and degree. """
+        return self.get_by_reference(lps_unity.Angle.DEGREE, BearingReference.NCW)
+
+    def get_ncw_rad(self) -> float:
+        """ Return bearing in ncw and radian. """
+        return self.get_by_reference(lps_unity.Angle.RADIAN, BearingReference.NCW)
+
+    def __add__(self, other: 'Quantity') -> 'Quantity':
+        self._check_compatibility(other)
+        if isinstance(other, Bearing):
+            return Bearing.eccw_rad(self.get_eccw_rad() + other.get_eccw_rad())
+        if isinstance(other, Angle):
+            return Bearing.eccw_rad(self.get_eccw_rad() + other.get_rad())
+
+        my_self = Angle.rad(self.get_eccw_rad())
+        return my_self + other
+
+    def __sub__(self, other: 'Quantity') -> 'Quantity':
+        self._check_compatibility(other)
+        if isinstance(other, RelativeBearing):
+            return Bearing.eccw_rad(self.get_eccw_rad() - other.get_ccw_rad())
+        if isinstance(other, Bearing):
+            return RelativeBearing.ccw_rad(self.get_eccw_rad() - other.get_eccw_rad())
+        if isinstance(other, Angle):
+            return Bearing.eccw_rad(self.get_eccw_rad() - other.get_rad())
+
+        my_self = Angle.rad(self.get_eccw_rad())
+        return my_self - other
+
+    def __mul__(self, other) -> 'Quantity':
+        my_self = Angle.rad(self.get_eccw_rad())
+        aux = my_self * other
+
+        if isinstance(aux, Angle):
+            return Bearing.eccw_rad(aux.get_rad())
+        return aux
+
+    def __truediv__(self, other) -> 'Quantity':
+        my_self = Angle.rad(self.get_eccw_rad())
+        aux = my_self / other
+
+        if isinstance(aux, Angle):
+            return Bearing.eccw_rad(aux.get_rad())
+        return aux
+
+class RelativeBearingReference(enum.Enum):
+    """ Class to represent reference of a relative_bearing. """
+    CCW = 0
+    COUNTERCLOCKWISE = 0
+    CW = 1
+    CLOCKWISE = 1
+
+class RelativeBearing(Bearing):
+    """ Class to represent a Angle between 0-360. """
+
+    def __init__(self,
+                 angle: Angle,
+                 reference: RelativeBearingReference):
+        angle = RelativeBearing.set_reference(angle, reference)
+        super().__init__(angle, BearingReference.ECCW)
+
+    @staticmethod
+    def set_reference(angle: Angle, reference: RelativeBearingReference) -> Angle:
+        """ Return Angle in CCW. """
+        return Angle.rad(angle.get_rad() if (reference == RelativeBearingReference.CCW) \
+                         else (math.pi/2.0 - angle.get_rad()))
+
+    @staticmethod
+    def coerce(angle: Angle) -> Angle:
+        """ Coerce an angle in range from 0 to 2pi. """
+        return Angle.rad(math.fmod(angle.get_rad(), 2*math.pi) + \
+                         (0.0 if (angle.get_rad() >= 0) else (2*math.pi) ))
+
+    @classmethod
+    def ccw_deg(cls, degree: float) -> 'RelativeBearing':
+        """ Class constructor in ccw. """
+        return cls(Angle.deg(degree), RelativeBearingReference.CCW)
+
+    @classmethod
+    def ccw_rad(cls, radian: float) -> 'RelativeBearing':
+        """ Class constructor in ccw. """
+        return cls(Angle.rad(radian), RelativeBearingReference.CCW)
+
+    @classmethod
+    def cw_deg(cls, degree: float) -> 'RelativeBearing':
+        """ Class constructor in cw. """
+        return cls(Angle.deg(degree), RelativeBearingReference.CW)
+
+    @classmethod
+    def cw_rad(cls, radian: float) -> 'RelativeBearing':
+        """ Class constructor in cw. """
+        return cls(Angle.rad(radian), RelativeBearingReference.CW)
+
+    def get_by_reference(self, angle: lps_unity.Angle, reference: RelativeBearingReference):
+        """ Return bearing in unity and reference desired. """
+        return Bearing.coerce(RelativeBearing.set_reference(self,reference)).get(angle)
+
+    def get_ccw_deg(self) -> float:
+        """ Return bearing in ccw and degree. """
+        return self.get_by_reference(lps_unity.Angle.DEGREE, RelativeBearingReference.CCW)
+
+    def get_ccw_rad(self) -> float:
+        """ Return bearing in ccw and radian. """
+        return self.get_by_reference(lps_unity.Angle.RADIAN, RelativeBearingReference.CCW)
+
+    def get_cw_deg(self) -> float:
+        """ Return bearing in cw and degree. """
+        return self.get_by_reference(lps_unity.Angle.DEGREE, RelativeBearingReference.CW)
+
+    def get_cw_rad(self) -> float:
+        """ Return bearing in cw and radian. """
+        return self.get_by_reference(lps_unity.Angle.RADIAN, RelativeBearingReference.CW)
+
+    def __add__(self, other: 'Quantity') -> 'Quantity':
+        self._check_compatibility(other)
+        if isinstance(other, (RelativeBearing, Angle)):
+            return RelativeBearing.ccw_rad(self.get_ccw_rad() + other.get_rad())
+
+        if isinstance(other, Bearing):
+            return Bearing.eccw_rad(self.get_ccw_rad() + other.get_eccw_rad())
+
+        my_self = Angle.rad(self.get_eccw_rad())
+        return my_self - other
+
+    def __sub__(self, other: 'Quantity') -> 'Quantity':
+        self._check_compatibility(other)
+        if isinstance(other, (RelativeBearing, Angle)):
+            return RelativeBearing.ccw_rad(self.get_ccw_rad() - other.get_rad())
+
+        if isinstance(other, Bearing):
+            return Bearing.eccw_rad(self.get_ccw_rad() - other.get_eccw_rad())
+
+        my_self = Angle.rad(self.get_eccw_rad())
+        return my_self - other
+
+    def __mul__(self, other) -> 'Quantity':
+        my_self = Angle.rad(self.get_eccw_rad())
+        aux = my_self * other
+
+        if isinstance(aux, Angle):
+            return RelativeBearing.ccw_rad(aux.get_rad())
+        return aux
+
+    def __truediv__(self, other) -> 'Quantity':
+        my_self = Angle.rad(self.get_eccw_rad())
+        aux = my_self / other
+
+        if isinstance(aux, Angle):
+            return RelativeBearing.ccw_rad(aux.get_rad())
+        return aux
 
 class Latitude(Angle):
     """ Class to represent Latitude with predefined units. """
@@ -614,7 +819,6 @@ class Latitude(Angle):
     def __str__(self) -> str:
         return f"{self.get_dms()} {self.get_hemisphere()}"
 
-
 class Longitude(Angle):
     """ Class to represent Longitude with predefined units. """
 
@@ -634,7 +838,6 @@ class Longitude(Angle):
 
     def __str__(self) -> str:
         return f"{self.get_dms()} {self.get_hemisphere()}"
-
 
 class AngularVelocity(Quantity):
     """ Class to represent Angular Velocity with predefined units. """
@@ -670,7 +873,6 @@ class AngularVelocity(Quantity):
 
         return super().__mul__(other)
 
-
 class Density(Quantity):
     """ Class to represent Density with predefined units. """
 
@@ -698,7 +900,6 @@ class Density(Quantity):
     def g_cm3(g_cm3: float) -> 'Density':
         """ Creates a Density instance with the magnitude in grams per cubic centimeter. """
         return Density(g_cm3, lps_unity.Density.G_CM3)
-
 
 class Timestamp:
     """ Class to represent a specific point in time with nanosecond precision. """
@@ -776,6 +977,12 @@ class Timestamp:
 
     def __str__(self) -> str:
         return self.to_string()
+
+    def __repr__(self):
+        return self.__str__()
+
+    def __hash__(self):
+        return hash((self._t))
 
     def __add__(self, other):
         if isinstance(other, Time):

@@ -1,3 +1,5 @@
+""" Test for quantities module
+"""
 import math
 
 import lps_utils.quantities as lps_qty
@@ -172,3 +174,34 @@ print(f"{type(lat)}: {lat}")
 
 lon = lps_qty.Longitude.dms(dms2)
 print(f"{type(lon)}: {lon}")
+
+
+print("\n======= Bearing =======")
+
+b3 = lps_qty.Bearing.eccw_deg(-10)
+print("b3[eccw_deg(-10)]: \t", b3, "\t", b3.get_ncw_rad())
+
+b4 = lps_qty.Bearing.eccw_deg(-355)
+print("b4[eccw_deg(-355)]: \t", b4, "\t", b4.get_ncw_rad())
+
+b5 = lps_qty.Bearing.ncw_deg(-10)
+print("b5[ncw_deg(-10)]: \t", b5, "\t", b5.get_ncw_rad())
+
+b6 = lps_qty.Bearing.ncw_deg(-355)
+print("b6[ncw_deg(-355)]: \t", b6, "\t", b6.get_ncw_rad())
+
+b7 = lps_qty.Bearing.eccw_rad(1)
+print("b7[eccw_rad(1)]: \t", b7, "\t", b7.get_ncw_rad())
+
+b8 = lps_qty.Bearing.eccw_rad(-1)
+print("b8[eccw_rad(-1)]: \t", b8, "\t", b8.get_ncw_rad())
+
+
+print(f"b3+b4{type(b3+b4)}: ", b3+b4)
+print(f"b3-b4{type(b3-b4)}: ", b3-b4)
+print(f"b4-b3{type(b4-b3)}: ", b4-b3)
+print(f"b3+(b4-b3){type(b3+(b4-b3))}: ", b3+(b4-b3))
+print(f"b3-(b4-b3){type(b3-(b4-b3))}: ", b3-(b4-b3))
+print("2*b3: ", 2*b3)
+print("(b3*4)/2: ", (b3*4)/2)
+print(f"2*(b4-b3){type(2*(b4-b3))}: ", 2*(b4-b3))
