@@ -998,3 +998,22 @@ class Timestamp:
             return Timestamp.ns(self.get_ns() - other.get_ns())
 
         raise NotImplementedError(f'Timestamp - {type(other)}')
+
+class Sensitivity(Quantity):
+    """ Class to represent sensitivity with predefined units. """
+
+    def __init__(self,
+                 magnitude: float,
+                 unity: lps_unity.Sensitivity,
+                 prefix: lps_unity.Prefix = lps_unity.Prefix.BASE,
+                 power: int = 1):
+        super().__init__(magnitude, unity, prefix, power)
+
+    def get_db_v_p_upa(self) -> float:
+        """ Returns the magnitude in kilograms per cubic meter. """
+        return self.get(lps_unity.Sensitivity.DB_V_P_UPA)
+
+    @staticmethod
+    def db_v_p_upa(value: float) -> 'Sensitivity':
+        """ Creates a sensitivity instance with the magnitude in kilograms per cubic meter. """
+        return Sensitivity(value, lps_unity.Sensitivity.DB_V_P_UPA)

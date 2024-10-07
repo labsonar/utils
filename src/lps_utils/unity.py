@@ -100,7 +100,6 @@ class Prefix(enum.Enum):
             return ''
         return self.name.lower()
 
-
 class Unity():
     """ Class to represent a basic unity. """
 
@@ -111,7 +110,6 @@ class Unity():
     @abc.abstractmethod
     def __str__(self) -> str:
         """ Returns the unit as symbol """
-
 
 class Distance(Unity, enum.Enum):
     """ Enum to represent distance units. """
@@ -138,7 +136,6 @@ class Distance(Unity, enum.Enum):
         """ Returns the unit as str """
         return self.name.lower()
 
-
 class Time(Unity, enum.Enum):
     """ Enum to represent time units. """
     S = 0
@@ -164,7 +161,6 @@ class Time(Unity, enum.Enum):
         """ Returns the unit as str """
         return self.name.lower()
 
-
 class Frequency(Unity, enum.Enum):
     """ Enum to represent frequency units. """
     HZ = 0
@@ -188,7 +184,6 @@ class Frequency(Unity, enum.Enum):
         convert_list = ["Hz",
                         "RPM"]
         return convert_list[self.value]
-
 
 class Speed(Unity, enum.Enum):
     """ Enum to represent speed units. """
@@ -214,7 +209,6 @@ class Speed(Unity, enum.Enum):
     def __str__(self) -> str:
         """ Returns the unit as str """
         return self.name.lower().replace('_', '/')
-
 
 class Acceleration(Unity, enum.Enum):
     """ Enum to represent acceleration units. """
@@ -244,7 +238,6 @@ class Acceleration(Unity, enum.Enum):
                         "kt/h"]
         return convert_list[self.value]
 
-
 class Angle(Unity, enum.Enum):
     """ Enum to represent angle units. """
     RAD = 0
@@ -268,7 +261,6 @@ class Angle(Unity, enum.Enum):
         convert_list = ["rad",
                         "°"]
         return convert_list[self.value]
-
 
 class AngularVelocity(Unity, enum.Enum):
     """ Enum to represent angular velocity units. """
@@ -294,7 +286,6 @@ class AngularVelocity(Unity, enum.Enum):
                         "°/s"]
         return convert_list[self.value]
 
-
 class Density(Unity, enum.Enum):
     """ Enum to represent density units. """
     G_CM3 = 0
@@ -315,3 +306,16 @@ class Density(Unity, enum.Enum):
         """ Returns the unit as string """
         unit_list = ["g/cm^3", "kg/m^3"]
         return unit_list[self.value]
+
+class Sensitivity(Unity, enum.Enum):
+    """ Enum to represent sensitivity units (dB re 1 V/μPa). """
+    DB_RE_1_VOLT_PER_MICROPAL = 0
+    DB_V_P_UPA = 0
+
+    def convert_to_base(self) -> float:
+        """ Converts the sensitivity unit to (dB re 1 V/μPa). """
+        convert_list = [1]
+        return convert_list[self.value]
+
+    def __str__(self) -> str:
+        return self.name.replace('_', ' (re 1 V/μPa)')
