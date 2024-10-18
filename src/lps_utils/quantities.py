@@ -97,14 +97,14 @@ class Quantity():
 
     def __add__(self, other: 'Quantity') -> 'Quantity':
         self._check_compatibility(other)
-        return self.__class__(self.magnitude + other.get(self.unity, self.prefix),
+        return self.__class__(self.get(self.unity, self.prefix) + other.get(self.unity, self.prefix),
                         self.unity,
                         self.prefix,
                         self.power)
 
     def __sub__(self, other: 'Quantity') -> 'Quantity':
         self._check_compatibility(other)
-        return self.__class__(self.magnitude - other.get(self.unity, self.prefix),
+        return self.__class__(self.get(self.unity, self.prefix) - other.get(self.unity, self.prefix),
                         self.unity,
                         self.prefix,
                         self.power)
@@ -113,7 +113,7 @@ class Quantity():
 
         if isinstance(other, type(self)):
             self._check_compatibility(other)
-            return self.__class__(self.magnitude * other.get(self.unity, self.prefix),
+            return self.__class__(self.get(self.unity, self.prefix) * other.get(self.unity, self.prefix),
                         self.unity,
                         self.prefix,
                         self.power + other.power)
@@ -135,9 +135,9 @@ class Quantity():
 
             self._check_compatibility(other)
             if self.power == other.power:
-                return self.magnitude / other.get(self.unity, self.prefix)
+                return self.get(self.unity, self.prefix) / other.get(self.unity, self.prefix)
 
-            return self.__class__(self.magnitude / other.get(self.unity, self.prefix),
+            return self.__class__(self.get(self.unity, self.prefix) / other.get(self.unity, self.prefix),
                         self.unity,
                         self.prefix,
                         self.power - other.power)
@@ -157,10 +157,11 @@ class Quantity():
                         self.power * -1)
 
     def __pow__(self, exponent: float) -> 'Quantity':
+        aux = self.get(self.unity, lps_unity.Prefix.BASE)
         return self.__class__(
-            self.magnitude ** exponent,
+            aux ** exponent,
             self.unity,
-            self.prefix,
+            lps_unity.Prefix.BASE,
             self.power * exponent
         )
 
@@ -190,6 +191,10 @@ class Distance(Quantity):
         """ Returns the magnitude in yards. """
         return self.get(lps_unity.Distance.YD)
 
+    def get_ft(self) -> float:
+        """ Returns the magnitude in foots. """
+        return self.get(lps_unity.Distance.FT)
+
     @classmethod
     def m(cls, m: float) -> 'Distance':
         """ Creates a Distance instance with the magnitude in meters. """
@@ -214,6 +219,11 @@ class Distance(Quantity):
     def kyd(cls, kyd: float) -> 'Distance':
         """ Creates a Distance instance with the magnitude in kilometers of yards. """
         return cls(kyd, lps_unity.Distance.YD, lps_unity.Prefix.k)
+
+    @classmethod
+    def ft(cls, ft: float) -> 'Distance':
+        """ Creates a Distance instance with the magnitude in foots. """
+        return cls(ft, lps_unity.Distance.FT)
 
     def __mul__(self, other) -> 'Quantity':
         if isinstance(other, Frequency):

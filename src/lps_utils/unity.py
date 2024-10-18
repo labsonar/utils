@@ -119,6 +119,8 @@ class Distance(Unity, enum.Enum):
     YARD = 1
     NM = 2
     NAUTICAL_MILE = 2
+    FT = 3
+    FOOT = 3
 
     def convert_to_base(self) -> float:
         """
@@ -129,7 +131,8 @@ class Distance(Unity, enum.Enum):
         """
         convert_list = [1,
                         0.9144,
-                        1852]
+                        1852,
+                        0.3048]
         return convert_list[self.value]
 
     def __str__(self) -> str:
@@ -176,7 +179,7 @@ class Frequency(Unity, enum.Enum):
             float: The conversion value to the base unit (hertz).
         """
         convert_list = [1,
-                        60]
+                        1/60]
         return convert_list[self.value]
 
     def __str__(self) -> str:
