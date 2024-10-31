@@ -58,7 +58,7 @@ class Quantity():
     def convert_unity(unity_in: lps_unity.Unity, unity_out: lps_unity.Unity, power: int):
         """ Convert a unity in another. """
         if isinstance(unity_in, type(unity_out)) or isinstance(unity_out, type(unity_in)):
-            return unity_in.convert_to_base()/unity_out.convert_to_base() ** power
+            return (unity_in.convert_to_base()/unity_out.convert_to_base()) ** power
         raise UnboundLocalError(f'Convertion from {type(unity_in)} to {type(unity_out)}')
 
     def _check_compatibility(self, other: 'Quantity') -> bool:
