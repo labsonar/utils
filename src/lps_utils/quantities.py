@@ -667,8 +667,12 @@ class Bearing(Angle):
 
     def __add__(self, other: 'Quantity') -> 'Quantity':
         self._check_compatibility(other)
+        if isinstance(other, RelativeBearing):
+            return Bearing.eccw_rad(self.get_eccw_rad() + other.get_ccw_rad())
+
         if isinstance(other, Bearing):
             return Bearing.eccw_rad(self.get_eccw_rad() + other.get_eccw_rad())
+        
         if isinstance(other, Angle):
             return Bearing.eccw_rad(self.get_eccw_rad() + other.get_rad())
 
@@ -679,8 +683,10 @@ class Bearing(Angle):
         self._check_compatibility(other)
         if isinstance(other, RelativeBearing):
             return Bearing.eccw_rad(self.get_eccw_rad() - other.get_ccw_rad())
+
         if isinstance(other, Bearing):
             return RelativeBearing.ccw_rad(self.get_eccw_rad() - other.get_eccw_rad())
+
         if isinstance(other, Angle):
             return Bearing.eccw_rad(self.get_eccw_rad() - other.get_rad())
 
@@ -773,22 +779,23 @@ class RelativeBearing(Bearing):
 
     def __add__(self, other: 'Quantity') -> 'Quantity':
         self._check_compatibility(other)
-        if isinstance(other, (RelativeBearing, Angle)):
-            return RelativeBearing.ccw_rad(self.get_ccw_rad() + other.get_rad())
-
         if isinstance(other, Bearing):
             return Bearing.eccw_rad(self.get_ccw_rad() + other.get_eccw_rad())
+
+        if isinstance(other, (RelativeBearing, Angle)):
+            return RelativeBearing.ccw_rad(self.get_ccw_rad() + other.get_rad())
 
         my_self = Angle.rad(self.get_eccw_rad())
         return my_self - other
 
     def __sub__(self, other: 'Quantity') -> 'Quantity':
         self._check_compatibility(other)
-        if isinstance(other, (RelativeBearing, Angle)):
-            return RelativeBearing.ccw_rad(self.get_ccw_rad() - other.get_rad())
 
         if isinstance(other, Bearing):
             return Bearing.eccw_rad(self.get_ccw_rad() - other.get_eccw_rad())
+
+        if isinstance(other, (RelativeBearing, Angle)):
+            return RelativeBearing.ccw_rad(self.get_ccw_rad() - other.get_rad())
 
         my_self = Angle.rad(self.get_eccw_rad())
         return my_self - other
