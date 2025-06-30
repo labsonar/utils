@@ -33,6 +33,18 @@ class Quantity():
         self.prefix = prefix
         self.power = power
 
+    def __abs__(self):
+        """
+        Return a copy of the object with positive magnitude.
+        Supports subclassing by using self.__class__.
+        """
+        return self.__class__(
+            magnitude=abs(self.magnitude),
+            unity=self.unity,
+            prefix=self.prefix,
+            power=self.power
+        )
+
     def __str__(self) -> str:
         if self.power == 1:
             return f'{self.magnitude} {self.prefix}{self.unity}'
@@ -164,6 +176,7 @@ class Quantity():
             lps_unity.Prefix.BASE,
             self.power * exponent
         )
+
 
 class Distance(Quantity):
     """ Class to represent Distance with predefined units. """
@@ -434,7 +447,7 @@ class Speed(Quantity):
 
     def __truediv__(self, other) -> 'Quantity':
         if isinstance(other, Distance):
-            return 1/(other/self)
+            return Frequency.hz(self.get_m_s()/ other.get_m())
 
         if isinstance(other, Frequency):
             return self*(1/other)
@@ -672,7 +685,7 @@ class Bearing(Angle):
 
         if isinstance(other, Bearing):
             return Bearing.eccw_rad(self.get_eccw_rad() + other.get_eccw_rad())
-        
+
         if isinstance(other, Angle):
             return Bearing.eccw_rad(self.get_eccw_rad() + other.get_rad())
 
