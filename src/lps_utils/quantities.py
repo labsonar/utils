@@ -678,6 +678,9 @@ class Bearing(Angle):
         """ Return bearing in ncw and radian. """
         return self.get_by_reference(lps_unity.Angle.RADIAN, BearingReference.NCW)
 
+    def __str__(self) -> str:
+        return f"{self.get_eccw_deg()} deg_eccw"
+
     def __add__(self, other: 'Quantity') -> 'Quantity':
         self._check_compatibility(other)
         if isinstance(other, RelativeBearing):
@@ -828,6 +831,9 @@ class RelativeBearing(Bearing):
         if isinstance(aux, Angle):
             return RelativeBearing.ccw_rad(aux.get_rad())
         return aux
+
+    def __str__(self) -> str:
+        return f"{self.get_ccw_deg()} deg_ccw"
 
 class Latitude(Angle):
     """ Class to represent Latitude with predefined units. """
