@@ -401,6 +401,13 @@ class Frequency(Quantity):
             return self * (1/other)
         return super().__truediv__(other)
 
+    def __mul__(self, other) -> 'Quantity':
+
+        if isinstance(other, Time):
+            return other * self
+
+        return super().__mul__(other)
+
 class Speed(Quantity):
     """ Class to represent speed with predefined units. """
 
@@ -442,6 +449,9 @@ class Speed(Quantity):
 
         if isinstance(other, Time):
             return other * self
+
+        if isinstance(other, Frequency):
+            return self/(1/other)
 
         return super().__mul__(other)
 
