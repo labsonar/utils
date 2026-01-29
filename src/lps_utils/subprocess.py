@@ -25,7 +25,9 @@ def run_process(
                                cwd=running_directory,
                                stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE,
-                               text=True)
+                               text=True,
+                               encoding="utf-8",
+                               errors="replace")
 
     while True:
         output = process.stdout.readline()
