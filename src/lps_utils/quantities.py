@@ -542,7 +542,7 @@ class DMS():
         """
         aux_degree = self.degree if show_signal else abs(self.degree)
         format_spec = "02.0f" if precision == 0 else f"{precision + 3}.{precision}f"
-        return f"{aux_degree:02.0f}°{self.minute:02.0f}'{self.second:{format_spec}}\""
+        return f"{aux_degree:02.0f}°{self.minute:02.0f}′{self.second:{format_spec}}″"
 
     def get_degrees(self) -> float:
         """ Return angle with degrees with decimal precision. """
